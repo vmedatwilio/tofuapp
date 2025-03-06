@@ -1011,12 +1011,15 @@ module.exports = async function (fastify, opts) {
                 logger.info(`summaryMapKey: ${summaryMapKey}`);
                 logger.info(`summaryRecordsMap[summaryMapKey]: ${summaryRecordsMap[summaryMapKey]}`);
 
-                if(summaryRecordsMap!=undefined && summaryRecordsMap!=null && summaryRecordsMap[summaryMapKey] != null && summaryRecordsMap[summaryMapKey] != undefined)
+                let recId = getValueByKey(summaryRecordsMap,summaryMapKey);
+                logger.info(`recId: ${recId}`);
+
+                if(summaryRecordsMap!=undefined && summaryRecordsMap!=null && recId!=null && recId!=undefined)
                 {
                     uow.registerUpdate({
                         type: 'Timeline_Summary__c',
                         fields: {
-                            Id : summaryRecordsMap[summaryMapKey],
+                            Id : recId,
                             Parent_Id__c : parentId,
                             Month__c : motnhValue,
                             Year__c : year,
@@ -1174,5 +1177,11 @@ module.exports = async function (fastify, opts) {
             throw error;
         }
     }
+
+    function getValueByKey(records, searchKey) {
+        const record = records.find(item => item.key === searchKey);
+        return record ? record.value : null;
+    }
+
     
 }
