@@ -1007,7 +1007,8 @@ module.exports = async function (fastify, opts) {
 
 
                 let summaryMapKey = (summaryCategory=='Quarterly')? FYQuartervalue + ' ' + year : motnhValue + ' ' + year;
-
+                logger.info(`summaryMapKey: ${summaryMapKey}`);
+                logger.info(`summaryRecordsMap[summaryMapKey]: ${summaryRecordsMap[summaryMapKey]}`);
 
                 if(summaryRecordsMap!=undefined && summaryRecordsMap!=null && summaryRecordsMap[summaryMapKey] != null && summaryRecordsMap[summaryMapKey] != undefined)
                 {
