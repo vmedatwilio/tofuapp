@@ -1019,7 +1019,7 @@ module.exports = async function (fastify, opts) {
                     uow.registerUpdate({
                         type: 'Timeline_Summary__c',
                         fields: {
-                            Id : recId,
+                            id : recId,
                             Parent_Id__c : parentId,
                             Month__c : motnhValue,
                             Year__c : year,
