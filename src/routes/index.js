@@ -320,7 +320,7 @@ module.exports = async function (fastify, opts) {
                     **Strict Requirements:**
                     1. **Return only the JSON object** with no explanations or additional text.
                     2. **Ensure JSON is in minified format** (i.e., no extra spaces, line breaks, or special characters).
-                    3. The response **must be directly usable with "JSON.parse(response)"**.
+                    3. The response **must be directly usable with "JSON.parse(response)"**. It should not error with with errors like , "Unexpected non-whitespace character after JSON at position"
                     
                     **Handling Large Data Volumes:**  
                     If the data volume is too large for processing and summarization is not possible, return:  
@@ -421,7 +421,7 @@ module.exports = async function (fastify, opts) {
                 const assisstantPrompt=data.assisstantPrompt;
                 const userPrompt=data.userPrompt;
                 const query = queryText;
-                
+                const summaryRecordsMap = Object.entries(JSON.parse(data.summaryMap)).map(([key, value]) => ({ key, value }));
                 //fetch all activites of that account 
                 let groupedData={};    
                 groupedData = await fetchRecords(context,logger,query,groupedData);    
