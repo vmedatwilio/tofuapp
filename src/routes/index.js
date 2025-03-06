@@ -413,6 +413,8 @@ module.exports = async function (fastify, opts) {
             validateField('queryText', data.queryText);
             validateField('assisstantPrompt', data.assisstantPrompt);
             validateField('userPrompt', data.userPrompt);
+            validateField('summaryMap', data.summaryMap);
+            logger.info(`summaryMap  ${JSON.stringify(summaryMap || {})}`);
 
             try 
             {
@@ -421,6 +423,12 @@ module.exports = async function (fastify, opts) {
                 const assisstantPrompt=data.assisstantPrompt;
                 const userPrompt=data.userPrompt;
                 const query = queryText;
+                const summaryRecordsMap = Object.entries(JSON.parse(data.summaryMap)).map(([key, value]) => ({ key, value }))
+
+
+                Object.entries(JSON.parse(data.summaryMap)).map(([key, value]) => ({ key, value }))
+
+
                 
                 //fetch all activites of that account 
                 let groupedData={};    
@@ -510,7 +518,7 @@ module.exports = async function (fastify, opts) {
                 logger.info(`Final Summary received ${JSON.stringify(finalSummary)}`);
                 
 
-                const createmonthlysummariesinsalesforce = await createTimileSummarySalesforceRecords( finalSummary,accountId,'Monthly',dataApi,logger);
+                const createmonthlysummariesinsalesforce = await createTimileSummarySalesforceRecords( finalSummary,accountId,'Monthly',dataApi,logger,summaryRecordsMap);
 
                 const Quarterlysummary = await generateSummary(finalSummary,openai,logger,assistant,
                     `I have a JSON file containing monthly summaries of an account, where data is structured by year and then by month. Please generate a quarterly summary for each year while considering that the fiscal quarter starts in January. The output should be in JSON format, maintaining the same structure but grouped by quarters instead of months. Ensure the summary for each quarter appropriately consolidates the insights from the respective months.
@@ -526,7 +534,7 @@ module.exports = async function (fastify, opts) {
                 const quaertersums=JSON.parse(Quarterlysummary);
                 logger.info(`Quarterlysummary received ${JSON.stringify(quaertersums)}`);
 
-                const createQuarterlysummariesinsalesforce = await createTimileSummarySalesforceRecords( quaertersums,accountId,'Quarterly',dataApi,logger);
+                const createQuarterlysummariesinsalesforce = await createTimileSummarySalesforceRecords( quaertersums,accountId,'Quarterly',dataApi,logger,summaryRecordsMap);
 
                 /*const uploadResponse = await openai.files.create({
                     file: fs.createReadStream(filePath),
@@ -969,7 +977,7 @@ module.exports = async function (fastify, opts) {
         return summary.replace(/(\[\[\d+†source\]\]|\【\d+:\d+†source\】)/g, '');
 
     }
-    async function createTimileSummarySalesforceRecords( summaries={},parentId,summaryCategory,dataApi,logger) {
+    async function createTimileSummarySalesforceRecords( summaries={},parentId,summaryCategory,dataApi,logger,summaryRecordsMap) {
 
         // Create a unit of work that inserts multiple objects.
         const uow = dataApi.newUnitOfWork();
@@ -984,20 +992,45 @@ module.exports = async function (fastify, opts) {
                 let summaryValue=summaries[year][month].summary;
                 let startdate=summaries[year][month].startdate;
                 let count=summaries[year][month].count;
-                 uow.registerCreate({
-                    type: 'Timeline_Summary__c',
-                    fields: {
-                        Parent_Id__c : parentId,
-                        Month__c : motnhValue,
-                        Year__c : year,
-                        Summary_Category__c : summaryCategory,
-                        Summary_Details__c : summaryValue,
-                        FY_Quarter__c : FYQuartervalue,
-                        Month_Date__c:startdate,
-                        Number_of_Records__c:count,
-                        Account__c:parentId
-                    }
-                });
+                
+                let summaryMapKey = (summaryCategory=='Quarterly')? FYQuartervalue + ' ' + year : motnhValue + ' ' + year;
+
+
+                if(summaryRecordsMap!=null && summaryRecordsMap[summaryMapKey] != null && summaryRecordsMap[summaryMapKey] != undefined)
+                {
+                    uow.registerUpdate({
+                        type: 'Timeline_Summary__c',
+                        fields: {
+                            Id : summaryRecordsMap[summaryMapKey],
+                            Parent_Id__c : parentId,
+                            Month__c : motnhValue,
+                            Year__c : year,
+                            Summary_Category__c : summaryCategory,
+                            Summary_Details__c : summaryValue,
+                            FY_Quarter__c : FYQuartervalue,
+                            Month_Date__c:startdate,
+                            Number_of_Records__c:count,
+                            Account__c:parentId
+                        });
+
+                }
+                else {
+                    uow.registerCreate({
+                        type: 'Timeline_Summary__c',
+                        fields: {
+                            Parent_Id__c : parentId,
+                            Month__c : motnhValue,
+                            Year__c : year,
+                            Summary_Category__c : summaryCategory,
+                            Summary_Details__c : summaryValue,
+                            FY_Quarter__c : FYQuartervalue,
+                            Month_Date__c:startdate,
+                            Number_of_Records__c:count,
+                            Account__c:parentId
+                        }
+                    });
+                }
+                 
             }
         }
         try {
