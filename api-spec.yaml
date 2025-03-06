@@ -204,7 +204,9 @@ paths:
                 assisstantPrompt:
                   type: string
                 userPrompt:
-                  type: string   
+                  type: string
+                summaryMap:
+                  type: string     
                 callbackUrl:
                   type: string
       responses:
