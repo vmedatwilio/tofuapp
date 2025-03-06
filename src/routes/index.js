@@ -421,8 +421,13 @@ module.exports = async function (fastify, opts) {
                 const assisstantPrompt=data.assisstantPrompt;
                 const userPrompt=data.userPrompt;
                 const query = queryText;
-                const summaryRecordsMap = Object.entries(JSON.parse(data.summaryMap)).map(([key, value]) => ({ key, value }));
-                logger.info(`Assistant created: ${summaryRecordsMap}`);
+                let summaryRecordsMap={};
+                if(data.summaryMap != undefined) {
+                    summaryRecordsMap = Object.entries(JSON.parse(data.summaryMap)).map(([key, value]) => ({ key, value }));
+                    logger.info(`summaryRecordsMap: ${JSON.stringify(summaryRecordsMap)}`);
+                }
+                //const summaryRecordsMap = Object.entries(JSON.parse(data.summaryMap)).map(([key, value]) => ({ key, value }));
+                logger.info(`summaryRecordsMap: ${JSON.stringify(summaryRecordsMap)}`);
                 //fetch all activites of that account 
                 let groupedData={};    
                 groupedData = await fetchRecords(context,logger,query,groupedData);    
@@ -1005,7 +1010,7 @@ module.exports = async function (fastify, opts) {
                 let summaryMapKey = (summaryCategory=='Quarterly')? FYQuartervalue + ' ' + year : motnhValue + ' ' + year;
 
 
-                if(summaryRecordsMap!=null && summaryRecordsMap[summaryMapKey] != null && summaryRecordsMap[summaryMapKey] != undefined)
+                if(summaryRecordsMap!=undefined && summaryRecordsMap!=null && summaryRecordsMap[summaryMapKey] != null && summaryRecordsMap[summaryMapKey] != undefined)
                 {
                     uow.registerUpdate({
                         type: 'Timeline_Summary__c',
