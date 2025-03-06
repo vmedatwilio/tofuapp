@@ -986,6 +986,7 @@ module.exports = async function (fastify, opts) {
                 logger.info(`Summary:\n${summaries[year][month].summary}\n`);
                 let FYQuartervalue=(summaryCategory=='Quarterly')?month:'';
                 let motnhValue=(summaryCategory=='Monthly')?month:'';
+                let shortMonth = motnhValue.substring(0, 3);
                 let summaryValue=summaries[year][month].summary;
                 let startdate=summaries[year][month].startdate;
                 let count=summaries[year][month].count;
@@ -1006,7 +1007,7 @@ module.exports = async function (fastify, opts) {
 
 
 
-                let summaryMapKey = (summaryCategory=='Quarterly')? FYQuartervalue + ' ' + year : motnhValue + ' ' + year;
+                let summaryMapKey = (summaryCategory=='Quarterly')? FYQuartervalue + ' ' + year : shortMonth + ' ' + year;
                 logger.info(`summaryMapKey: ${summaryMapKey}`);
                 logger.info(`summaryRecordsMap[summaryMapKey]: ${summaryRecordsMap[summaryMapKey]}`);
 
