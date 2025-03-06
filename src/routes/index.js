@@ -427,7 +427,6 @@ module.exports = async function (fastify, opts) {
                     logger.info(`summaryRecordsMap: ${JSON.stringify(summaryRecordsMap)}`);
                 }
                 //const summaryRecordsMap = Object.entries(JSON.parse(data.summaryMap)).map(([key, value]) => ({ key, value }));
-                logger.info(`summaryRecordsMap: ${JSON.stringify(summaryRecordsMap)}`);
                 //fetch all activites of that account 
                 let groupedData={};    
                 groupedData = await fetchRecords(context,logger,query,groupedData);    
